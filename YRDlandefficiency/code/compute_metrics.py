@@ -13,27 +13,39 @@ YEARS = [1990, 2000, 2010, 2020]
 
 def load_data():
     wb = load_workbook(ROOT / "rowdata" / "YRD_city_inputs_1990_2020.xlsx", data_only=True, read_only=True)
-    ws = wb["Sheet1"]
+    ws = wb["Model Inputs"]
+    headers = {cell.value: cell.column for cell in ws[1]}
+    required = [
+        "Province-level unit",
+        "City",
+        "Abbreviation",
+        "Year",
+        "Built-up land area (km²)",
+        "Permanent resident population (10,000 persons)",
+        "Real GDP (CNY 100 million, constant 1978 prices)",
+        "CO₂ emissions (10,000 tonnes)",
+    ]
+    missing = [name for name in required if name not in headers]
+    if missing:
+        raise ValueError(f"Missing input columns: {missing}")
     rows = []
-    province = None
-    for r in range(3, 44):
-        if ws.cell(r, 1).value:
-            province = ws.cell(r, 1).value
-        city = ws.cell(r, 2).value
+    for values in ws.iter_rows(min_row=2, values_only=True):
+        city = values[headers["City"] - 1]
         if not city:
             continue
-        for j, year in enumerate(YEARS):
-            rows.append({
-                "province": province,
-                "city": city,
-                "short": ws.cell(r, 4).value,
-                "year": year,
-                "population": float(ws.cell(r, 5 + j).value),
-                "land": float(ws.cell(r, 9 + j).value),
-                "real_gdp": float(ws.cell(r, 17 + j).value),
-                "co2": float(ws.cell(r, 21 + j).value),
-            })
+        rows.append({
+            "province": values[headers["Province-level unit"] - 1],
+            "city": city,
+            "short": values[headers["Abbreviation"] - 1],
+            "year": int(values[headers["Year"] - 1]),
+            "land": float(values[headers["Built-up land area (km²)"] - 1]),
+            "population": float(values[headers["Permanent resident population (10,000 persons)"] - 1]),
+            "real_gdp": float(values[headers["Real GDP (CNY 100 million, constant 1978 prices)"] - 1]),
+            "co2": float(values[headers["CO₂ emissions (10,000 tonnes)"] - 1]),
+        })
     assert len(rows) == 164, len(rows)
+    assert sorted({row["year"] for row in rows}) == YEARS
+    assert len({row["city"] for row in rows}) == 41
     return rows
 
 
@@ -196,7 +208,8 @@ def main():
             sec = ec / pec
             tc = gml / ec
             gml_city.append((gml, tc, ec, pec, sec))
-            gml_rows.append({"city": ra["city"], "period": f"{y0}-{y1}",
+            gml_rows.append({"city": ra["city"], "abbreviation": ra["short"],
+                             "period": f"{y0}-{y1}",
                              "gml": gml, "tc": tc, "ec": ec,
                              "pec": pec, "sec": sec})
         gm = lambda vals: float(np.exp(np.mean(np.log(np.array(vals)))))
