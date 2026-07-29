@@ -12,7 +12,7 @@ YEARS = [1990, 2000, 2010, 2020]
 
 
 def load_data():
-    wb = load_workbook(ROOT / "data" / "raw" / "YRD_city_inputs_1990_2020.xlsx", data_only=True, read_only=True)
+    wb = load_workbook(ROOT / "rowdata" / "YRD_city_inputs_1990_2020.xlsx", data_only=True, read_only=True)
     ws = wb["Sheet1"]
     rows = []
     province = None
@@ -221,7 +221,7 @@ def main():
 
     result = {"rows": rows, "summary": summaries, "convergence": convergence,
               "mobility": mobility, "gml": gml_summary, "gml_rows": gml_rows}
-    out = ROOT / "results" / "derived" / "computed_metrics.json"
+    out = ROOT / "results" / "computed_metrics.json"
     out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps({"summary": summaries, "convergence": convergence,
                       "mobility": mobility, "gml": gml_summary}, ensure_ascii=False, indent=2))
