@@ -1,0 +1,15 @@
+{
+  "raw_records": 5365,
+  "unique_notes": 5048,
+  "semantic_records": 15880,
+  "notes_with_semantics": 3537,
+  "figure4_records": 12128,
+  "figure7_records": {
+    "正面": 4331,
+    "负面": 376
+  },
+  "sha256": {
+    "rawdata.csv": "99c24e53fea758bb570d3032e6cd530cfab507445eb9864454a6eb1979846f4f",
+    "results.csv": "05380843bddb3f506b45e91b557e770973307a5add9c47332a408a2d28cea606"
+  }
+}
